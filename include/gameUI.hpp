@@ -4,14 +4,29 @@
 
 #include "imgui.h"
 
+#include "backtracking.hpp"
+
 constexpr ImVec4 RGBA(int R, int G, int B, float A = 1.0f) { return ImVec4(R / 255.0f, G / 255.0f, B / 255.0f, A); }
+
+constexpr int ALGO_ALL = 0;
+constexpr int ALGO_BACKTRACKING = 1;
+constexpr int ALGO_BFS = 2;
+constexpr int ALGO_DFS = 3;
 
 enum class GameState {
     // SizeSelection,  // main menu
     DifficultySelection,
     WhoPlaysSelection,
-    PlayingMode
+    AlgoSelection,
+    PlayingMode,
+    AlgoSolving,
 };
+
+// enum class SolvingAlgo{
+//     Backtracking,
+//     BFS,
+//     DFS
+// }
 
 class GUI {
    private:
@@ -21,12 +36,16 @@ class GUI {
     ImFont* headingFont;
 
     std::vector<std::vector<int>> grid;
+    std::vector<std::vector<bool>> givens;
     GameState gameState;
+
     bool game_started;
-    bool show_difficulty_menu;
-    int selected_difficulty;
+    bool game_solving;
+    bool game_solved;
+
     int selected_mode;
-    int selected_size;
+    int selected_difficulty;
+    int selected_algo;
 
    public:
     GUI();
@@ -36,4 +55,6 @@ class GUI {
     void renderUI();
 
     void generatePuzzle();
+    
+    void solvePuzzleByAlgo();
 };

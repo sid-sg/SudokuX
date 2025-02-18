@@ -28,6 +28,7 @@ add_executable(sudokuSolver
     src/gameUI.cpp
     src/generatePuzzle.cpp
     src/puzzleRender.cpp
+    src/backtracking.cpp
 )
 
 target_link_libraries(sudokuSolver

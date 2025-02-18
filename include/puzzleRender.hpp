@@ -4,4 +4,7 @@
 
 #include "gameUI.hpp"
 
-void renderPuzzle(const std::vector<std::vector<int>>& grid);
+void renderPuzzleForAlgo(const std::vector<std::vector<int>>& grid, const std::vector<std::vector<bool>>& givens);
+
+void renderPuzzleForUser(const std::vector<std::vector<int>>& grid, const std::vector<std::vector<bool>>& givens);
+

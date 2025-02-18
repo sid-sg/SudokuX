@@ -145,10 +145,45 @@ int countColGivens(const std::vector<std::vector<int>>& grid, int col) {
     return count;
 }
 
-void digHoles(std::vector<std::vector<int>>& grid, int difficulty) {
+void getEvilGrid(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens) {
+    grid = {
+        {8, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 3, 0, 0, 0, 6, 0, 0, 0},
+        {7, 0, 0, 9, 0, 0, 0, 2, 0},
+        {0, 5, 0, 0, 0, 0, 7, 0, 0},
+        {0, 0, 0, 4, 0, 5, 0, 7, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 3},
+        {0, 1, 0, 0, 0, 0, 0, 6, 8},
+        {0, 0, 8, 5, 0, 0, 0, 1, 0},
+        {9, 0, 0, 0, 0, 0, 4, 0, 0}
+    };
+
+    givens = {
+        {1, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 1, 0, 0, 0, 1, 0, 0, 0},
+        {1, 0, 0, 1, 0, 0, 0, 1, 0},
+        {0, 1, 0, 0, 0, 0, 1, 0, 0},
+        {0, 0, 0, 1, 0, 1, 0, 1, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 1},
+        {0, 1, 0, 0, 0, 0, 0, 1, 1},
+        {0, 0, 1, 1, 0, 0, 0, 1, 0},
+        {1, 0, 0, 0, 0, 0, 1, 0, 0}
+    };
+}
+
+
+void digHoles(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens, int difficulty) {
+
+    if(difficulty == 4){
+        getEvilGrid(grid, givens);
+        return;
+    }
+    
     DifficultyMetrics metrics = getDifficultyMetrics(difficulty);
     int currentGivens = countGivens(grid);
     int cellsToRemove = currentGivens - metrics.targetGivens;
+
+    std::cout << "Initial Givens: " << currentGivens << " | Target: " << metrics.targetGivens << std::endl;
 
     std::vector<std::pair<int, int>> seq = generateSequence();
     std::vector<std::vector<bool>> tried(SIZE, std::vector<bool>(SIZE, false));
@@ -162,14 +197,31 @@ void digHoles(std::vector<std::vector<int>>& grid, int difficulty) {
 
         int backup = grid[row][col];
         grid[row][col] = EMPTY;
+        givens[row][col] = false;
 
         if (!hasUniqueSolution(grid)) {
             grid[row][col] = backup;
+            givens[row][col] = true;
         } else {
             cellsToRemove--;
         }
-
         tried[row][col] = true;
+    }
+
+    if (countGivens(grid) > metrics.targetGivens) {
+        for (auto [row, col] : seq) {
+            if (countGivens(grid) <= metrics.targetGivens) break;
+            if (grid[row][col] == EMPTY || tried[row][col]) continue;
+
+            int backup = grid[row][col];
+            grid[row][col] = EMPTY;
+            givens[row][col] = false;
+
+            if (!hasUniqueSolution(grid)) {
+                grid[row][col] = backup;
+                givens[row][col] = true;
+            }
+        }
     }
 
     std::cout << "Final Givens: " << countGivens(grid) << "\n";

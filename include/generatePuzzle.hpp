@@ -8,8 +8,7 @@
 #include <random>
 #include <vector>
 
-constexpr int SIZE = 9;
-constexpr int EMPTY = 0;
+#include "constants.hpp"
 
 // ------------------------
 // Backtracker to generate complete grid
@@ -35,7 +34,7 @@ std::vector<std::pair<int, int>> generateSequence();
 
 struct DifficultyMetrics {
     int targetGivens;
-    int rowColLB; //row/col lower bound
+    int rowColLB;  // row/col lower bound
 };
 
 DifficultyMetrics getDifficultyMetrics(int difficulty);
@@ -46,4 +45,4 @@ int countRowGivens(const std::vector<std::vector<int>>& grid, int row);
 
 int countColGivens(const std::vector<std::vector<int>>& grid, int col);
 
-void digHoles(std::vector<std::vector<int>>& grid, int difficulty);
+void digHoles(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens, int difficulty);
