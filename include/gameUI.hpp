@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <thread>
 
 #include "imgui.h"
 
@@ -38,6 +39,7 @@ class GUI {
     std::vector<std::vector<int>> grid;
     std::vector<std::vector<bool>> givens;
     GameState gameState;
+    double timeTaken;
 
     bool game_started;
     bool game_solving;
@@ -51,6 +53,8 @@ class GUI {
     GUI();
 
     ~GUI();
+
+
 
     void renderUI();
 

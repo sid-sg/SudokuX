@@ -1,11 +1,11 @@
 #include "gameUI.hpp"
 
-// #include <unordered_map>
+#include <chrono>
 
 #include "generatePuzzle.hpp"
 #include "puzzleRender.hpp"
 
-GUI::GUI() : io(ImGui::GetIO()), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), window_flags(0) {
+GUI::GUI() : io(ImGui::GetIO()), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0) {
     grid = std::vector<std::vector<int>>(SIZE, std::vector<int>(SIZE, EMPTY));
     givens = std::vector<std::vector<bool>>(SIZE, std::vector<bool>(SIZE, true));
 
@@ -34,54 +34,33 @@ GUI::GUI() : io(ImGui::GetIO()), game_started(false), game_solving(false), game_
 GUI::~GUI() {}
 
 void GUI::generatePuzzle() {
-    // for (int r = 0; r < SIZE; r++) {
-    //     for (int c = 0; c < SIZE; c++) {
-    //         std::cout << grid[r][c] << " ";
-    //     }
-    //     std::cout << "\n";
-    // }
-    // std::cout << "-------------------\n";
     if (!fillGrid(grid)) {
         std::cout << "Failed to generate complete grid!\n";
     }
-    // for (int r = 0; r < SIZE; r++) {
-    //     for (int c = 0; c < SIZE; c++) {
-    //         std::cout << grid[r][c] << " ";
-    //     }
-    //     std::cout << "\n";
-    // }
-    // std::cout << "-------------------\n";
     digHoles(grid, givens, selected_difficulty);
-    // for (int r = 0; r < SIZE; r++) {
-    //     for (int c = 0; c < SIZE; c++) {
-    //         std::cout << grid[r][c] << " ";
-    //     }
-    //     std::cout << "\n";
-    // }
-    // std::cout << "-------------------\n";
 }
 
 void GUI::solvePuzzleByAlgo() {
-    switch (selected_algo) {
-        case ALGO_ALL:
-            // solver::backtracking(grid);
-            // solver::bfs(grid);
-            // solver::dfs(grid);
-            break;
-        case ALGO_BACKTRACKING:
-            backtracking::solve(grid);
-            game_solved = true;
-            game_solving = false;
-            break;
-        case ALGO_BFS:
-            // bfs::solve(grid);
-            break;
-        case ALGO_DFS:
-            // dfs::solve(grid);
-            break;
-        default:
-            break;
-    }
+    // double timeTaken = 0;
+
+    std::thread([this]() {
+        switch (selected_algo) {
+            case ALGO_ALL:
+                break;
+            case ALGO_BACKTRACKING:
+                game_solving = true;
+                game_solved = false;
+
+                // Run solver in a separate thread
+                backtracking::solve(grid, timeTaken);
+                game_solved = true;
+                game_solving = false;
+
+                break;
+            default:
+                break;
+        }
+    }).detach();
 }
 
 void GUI::renderUI() {
@@ -116,7 +95,7 @@ void GUI::renderUI() {
             ImGui::RadioButton("Medium", &selected_difficulty, 1);
             ImGui::RadioButton("Hard", &selected_difficulty, 2);
             ImGui::RadioButton("Evil", &selected_difficulty, 3);
-            ImGui::RadioButton("Impossible", &selected_difficulty, 4);
+            // ImGui::RadioButton("Impossible", &selected_difficulty, 4);
 
             if (ImGui::Button("Next ->")) {
                 prevState = gameState;
@@ -153,8 +132,6 @@ void GUI::renderUI() {
 
             ImGui::RadioButton("All algos for benchmarking", &selected_algo, ALGO_ALL);
             ImGui::RadioButton("Backtracking", &selected_algo, ALGO_BACKTRACKING);
-            ImGui::RadioButton("BFS", &selected_algo, ALGO_BFS);
-            ImGui::RadioButton("DFS", &selected_algo, ALGO_DFS);
 
             ImGui::Spacing();
             if (ImGui::Button("Next ->")) {
@@ -206,10 +183,11 @@ void GUI::renderUI() {
             break;
         case GameState::AlgoSolving:
             if (game_solved) {
-                ImGui::Text("Solved!");
                 renderPuzzleForAlgo(grid, givens);
+                ImGui::Text("Time taken: %.4f ms", timeTaken);
             } else if (game_solving) {
                 ImGui::Text("Solving...");
+
                 solvePuzzleByAlgo();
                 game_solved = true;
                 game_solving = false;

@@ -45,4 +45,6 @@ int countRowGivens(const std::vector<std::vector<int>>& grid, int row);
 
 int countColGivens(const std::vector<std::vector<int>>& grid, int col);
 
+void getImpossibleGrid(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens);
+
 void digHoles(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens, int difficulty);

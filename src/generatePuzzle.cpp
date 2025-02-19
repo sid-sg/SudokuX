@@ -145,7 +145,7 @@ int countColGivens(const std::vector<std::vector<int>>& grid, int col) {
     return count;
 }
 
-void getEvilGrid(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens) {
+void getImpossibleGrid(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens) {
     grid = {
         {8, 0, 0, 0, 0, 0, 0, 0, 0},
         {0, 3, 0, 0, 0, 6, 0, 0, 0},
@@ -175,7 +175,7 @@ void getEvilGrid(std::vector<std::vector<int>>& grid, std::vector<std::vector<bo
 void digHoles(std::vector<std::vector<int>>& grid, std::vector<std::vector<bool>>& givens, int difficulty) {
 
     if(difficulty == 4){
-        getEvilGrid(grid, givens);
+        getImpossibleGrid(grid, givens);
         return;
     }
     
