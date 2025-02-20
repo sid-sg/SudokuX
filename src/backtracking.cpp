@@ -1,6 +1,6 @@
 #include "backtracking.hpp"
 
-#include <chrono>
+// #include <chrono>
 #include <iostream>
 // #include <thread>
 
@@ -39,16 +39,16 @@ bool solver(int row, int col, std::vector<std::vector<int>>& grid) {
     return false;
 }
 
-void solve(std::vector<std::vector<int>>& grid, double& timeTaken) {
-    auto timeStart = std::chrono::high_resolution_clock::now();
+void solve(std::vector<std::vector<int>>& grid) {
+    // auto timeStart = std::chrono::high_resolution_clock::now();
     // std::this_thread::sleep_for(std::chrono::milliseconds(3000));
 
     if (!solver(0, 0, grid)) {
         std::cout << "No solution exists!\n";
     }
+    std::cout<<"solved";
+    // auto timeEnd = std::chrono::high_resolution_clock::now();
 
-    auto timeEnd = std::chrono::high_resolution_clock::now();
-
-    timeTaken = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
+    // timeTaken = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();
 }
 }  // namespace backtracking

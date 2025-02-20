@@ -40,27 +40,53 @@ void GUI::generatePuzzle() {
     digHoles(grid, givens, selected_difficulty);
 }
 
+// void GUI::solvePuzzleByAlgo() {
+// double timeTaken = 0;
+
+// std::thread([this]() {
+//     switch (selected_algo) {
+//         case ALGO_ALL:
+//             break;
+//         case ALGO_BACKTRACKING:
+//             game_solving = true;
+//             game_solved = false;
+
+//             // Run solver in a separate thread
+//             backtracking::solve(grid, timeTaken);
+//             game_solved = true;
+//             game_solving = false;
+
+//             break;
+//         default:
+//             break;
+//     }
+// }).detach();
+// }
+
 void GUI::solvePuzzleByAlgo() {
-    // double timeTaken = 0;
+    game_solving = true;
+    game_solved = false;
+    timeTaken = 0;
 
     std::thread([this]() {
-        switch (selected_algo) {
-            case ALGO_ALL:
-                break;
-            case ALGO_BACKTRACKING:
-                game_solving = true;
-                game_solved = false;
+        auto start = std::chrono::high_resolution_clock::now();
 
-                // Run solver in a separate thread
-                backtracking::solve(grid, timeTaken);
-                game_solved = true;
-                game_solving = false;
+        backtracking::solve(grid);
 
-                break;
-            default:
-                break;
-        }
+        auto end = std::chrono::high_resolution_clock::now();
+        timeTaken = std::chrono::duration<double, std::milli>(end - start).count();
+        game_solved = true;
+        game_solving = false;
     }).detach();
+}
+
+void GUI::renderTime() {
+    if (timeTaken >= 1000) {
+        double seconds = timeTaken / 1000.0;
+        ImGui::Text("Time taken: %.2f s", seconds);
+    } else {
+        ImGui::Text("Time taken: %.4f ms", timeTaken);
+    }
 }
 
 void GUI::renderUI() {
@@ -95,7 +121,7 @@ void GUI::renderUI() {
             ImGui::RadioButton("Medium", &selected_difficulty, 1);
             ImGui::RadioButton("Hard", &selected_difficulty, 2);
             ImGui::RadioButton("Evil", &selected_difficulty, 3);
-            // ImGui::RadioButton("Impossible", &selected_difficulty, 4);
+            ImGui::RadioButton("Impossible", &selected_difficulty, 4);
 
             if (ImGui::Button("Next ->")) {
                 prevState = gameState;
@@ -184,7 +210,7 @@ void GUI::renderUI() {
         case GameState::AlgoSolving:
             if (game_solved) {
                 renderPuzzleForAlgo(grid, givens);
-                ImGui::Text("Time taken: %.4f ms", timeTaken);
+                renderTime();
             } else if (game_solving) {
                 ImGui::Text("Solving...");
 

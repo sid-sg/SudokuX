@@ -61,4 +61,6 @@ class GUI {
     void generatePuzzle();
     
     void solvePuzzleByAlgo();
+
+    void renderTime();
 };
