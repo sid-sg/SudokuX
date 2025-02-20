@@ -46,7 +46,6 @@ void solve(std::vector<std::vector<int>>& grid) {
     if (!solver(0, 0, grid)) {
         std::cout << "No solution exists!\n";
     }
-    std::cout<<"solved";
     // auto timeEnd = std::chrono::high_resolution_clock::now();
 
     // timeTaken = std::chrono::duration<double, std::milli>(timeEnd - timeStart).count();

@@ -100,19 +100,9 @@ void GUI::renderUI() {
     ImGui::Text("Sudoku-X");
     ImGui::PopFont();
 
-    for (int i = 0; i < 5; i++) {
-        ImGui::Spacing();
-    }
+    ImGui::Spacing();
     ImGui::Separator();
-
-    for (int i = 0; i < 10; i++) {
-        ImGui::Spacing();
-    }
-
-    // static const char* dimensions[] = {"4x4", "9x9", "16x16", "25x25"};
-    // std::unordered_map<int, int> dimensionValue = {{0,4}, {1, 9}, {2, 16}, {3, 25}};
-
-    GameState prevState = GameState::DifficultySelection;
+    ImGui::Spacing();
 
     switch (gameState) {
         case GameState::DifficultySelection:
@@ -123,10 +113,7 @@ void GUI::renderUI() {
             ImGui::RadioButton("Evil", &selected_difficulty, 3);
             ImGui::RadioButton("Impossible", &selected_difficulty, 4);
 
-            if (ImGui::Button("Next ->")) {
-                prevState = gameState;
-                gameState = GameState::WhoPlaysSelection;
-            }
+            if (ImGui::Button("Next ->")) gameState = GameState::WhoPlaysSelection;
             break;
 
         case GameState::WhoPlaysSelection:
@@ -134,97 +121,56 @@ void GUI::renderUI() {
             ImGui::RadioButton("I'll Play", &selected_mode, 0);
             ImGui::RadioButton("Computer Solve", &selected_mode, 1);
 
-            ImGui::Spacing();
-            if (selected_mode == 0) {
-                if (ImGui::Button("Start game")) {
-                    prevState = gameState;
-                    gameState = GameState::PlayingMode;
-                    game_started = true;
-                }
-            } else {
-                if (ImGui::Button("Next ->")) {
-                    prevState = gameState;
-                    gameState = GameState::AlgoSelection;
-                }
-            }
-
-            if (ImGui::Button("Back")) {
-                gameState = prevState;
-            }
+            if (ImGui::Button("Next ->")) gameState = GameState::AlgoSelection;
+            if (ImGui::Button("Back")) gameState = GameState::DifficultySelection;
             break;
 
         case GameState::AlgoSelection:
             ImGui::Text("Select Solving Algorithm:");
-
             ImGui::RadioButton("All algos for benchmarking", &selected_algo, ALGO_ALL);
             ImGui::RadioButton("Backtracking", &selected_algo, ALGO_BACKTRACKING);
 
-            ImGui::Spacing();
             if (ImGui::Button("Next ->")) {
-                prevState = gameState;
                 gameState = GameState::PlayingMode;
                 game_started = true;
-                game_solved = false;
-                game_solving = false;
             }
-
-            if (ImGui::Button("Back")) {
-                gameState = prevState;
-            }
+            if (ImGui::Button("Back")) gameState = GameState::WhoPlaysSelection;
             break;
 
         case GameState::PlayingMode:
             if (selected_mode == 0) {
                 ImGui::Text("Game Started!");
-
                 if (game_started) {
                     generatePuzzle();
                     game_started = false;
                 }
-
                 renderPuzzleForUser(grid, givens);
-
             } else {
                 if (game_started) {
                     generatePuzzle();
                     game_started = false;
-                    game_solved = false;
-                    game_solving = false;
                 }
 
                 renderPuzzleForAlgo(grid, givens);
 
                 if (ImGui::Button("Solve")) {
-                    prevState = gameState;
                     gameState = GameState::AlgoSolving;
-                    game_solving = true;
-                    game_solved = false;
+                    solvePuzzleByAlgo();  // Trigger solver
                 }
             }
-            if (ImGui::Button("Return to Menu")) {
-                prevState = gameState;
-                gameState = GameState::DifficultySelection;
-                game_started = false;
-            }
+
+            if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
             break;
+
         case GameState::AlgoSolving:
-            if (game_solved) {
+            if (game_solving) {
+                ImGui::Text("Solving... Please wait.");
+            } else if (game_solved) {
                 renderPuzzleForAlgo(grid, givens);
                 renderTime();
-            } else if (game_solving) {
-                ImGui::Text("Solving...");
-
-                solvePuzzleByAlgo();
-                game_solved = true;
-                game_solving = false;
             }
 
-            if (ImGui::Button("Return to Menu")) {
-                gameState = GameState::DifficultySelection;
-                game_started = false;
-                game_solved = false;
-                game_solving = false;
-            }
+            if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
             break;
 
         default:
