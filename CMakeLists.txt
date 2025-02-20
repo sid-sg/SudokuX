@@ -2,6 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(Sudoku-Solver VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native -flto")
+set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
+
+
+message(STATUS "Using C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -37,3 +42,4 @@ target_link_libraries(sudokuSolver
     OpenGL::OpenGL
     glfw
 )
+
