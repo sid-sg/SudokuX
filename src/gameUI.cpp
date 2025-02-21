@@ -14,8 +14,8 @@ GUI::GUI() : io(ImGui::GetIO()), game_started(false), game_solving(false), game_
     (void)this->io;
     this->io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
-    mainFont = this->io.Fonts->AddFontFromFileTTF("../font/BebasNeue-Regular.ttf", 24.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
-    headingFont = this->io.Fonts->AddFontFromFileTTF("../font/Bangers-Regular.ttf", 100.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    mainFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/BebasNeue-Regular.ttf", 24.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    headingFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/Bangers-Regular.ttf", 100.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
 
     this->io.FontDefault = mainFont;
 

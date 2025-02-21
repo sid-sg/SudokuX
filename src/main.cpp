@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "gameUI.hpp"
-
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -20,7 +19,26 @@
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 static void glfw_error_callback(int error, const char* description) { fprintf(stderr, "GLFW Error %d: %s\n", error, description); }
+
+void setWindowIcon(GLFWwindow* window) {
+    int width, height, channels;
+    unsigned char* pixels = stbi_load("/home/sid/repos/sudoku/assets/icon/image.jpg", &width, &height, &channels, 4);
+    if (pixels) {
+        GLFWimage icon;
+        icon.width = width;
+        icon.height = height;
+        icon.pixels = pixels;
+
+        glfwSetWindowIcon(window, 1, &icon);
+        stbi_image_free(pixels);
+    } else {
+        printf("Failed to load icon: %s\n", stbi_failure_reason());
+    }
+}
 
 int main(int, char**) {
     glfwSetErrorCallback(glfw_error_callback);
@@ -60,6 +78,8 @@ int main(int, char**) {
     if (window == nullptr) return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);  // Enable vsync
+
+    setWindowIcon(window);
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
