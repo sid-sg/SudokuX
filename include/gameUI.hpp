@@ -1,11 +1,13 @@
 #pragma once
 
-#include <vector>
+#include <atomic>
+#include <memory>
 #include <thread>
-
-#include "imgui.h"
+#include <vector>
 
 #include "backtracking.hpp"
+#include "imgui.h"
+#include "imgui_internal.h"
 
 constexpr ImVec4 RGBA(int R, int G, int B, float A = 1.0f) { return ImVec4(R / 255.0f, G / 255.0f, B / 255.0f, A); }
 
@@ -49,17 +51,20 @@ class GUI {
     int selected_difficulty;
     int selected_algo;
 
+    std::unique_ptr<std::thread> solverThread;
+    std::atomic<bool> solverRunning;
+
    public:
     GUI();
 
     ~GUI();
 
-
+    bool Spinner(const char* label, float radius, int thickness, const ImU32& color);
 
     void renderUI();
 
     void generatePuzzle();
-    
+
     void solvePuzzleByAlgo();
 
     void renderTime();

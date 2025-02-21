@@ -3,11 +3,9 @@
 #include <chrono>
 
 #include "generatePuzzle.hpp"
-#include "imgui.h"
-#include "imgui_internal.h"
 #include "puzzleRender.hpp"
 
-GUI::GUI() : io(ImGui::GetIO()), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0) {
+GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0) {
     grid = std::vector<std::vector<int>>(SIZE, std::vector<int>(SIZE, EMPTY));
     givens = std::vector<std::vector<bool>>(SIZE, std::vector<bool>(SIZE, true));
 
@@ -42,44 +40,39 @@ void GUI::generatePuzzle() {
     digHoles(grid, givens, selected_difficulty);
 }
 
-// void GUI::solvePuzzleByAlgo() {
-// double timeTaken = 0;
-
-// std::thread([this]() {
-//     switch (selected_algo) {
-//         case ALGO_ALL:
-//             break;
-//         case ALGO_BACKTRACKING:
-//             game_solving = true;
-//             game_solved = false;
-
-//             // Run solver in a separate thread
-//             backtracking::solve(grid, timeTaken);
-//             game_solved = true;
-//             game_solving = false;
-
-//             break;
-//         default:
-//             break;
-//     }
-// }).detach();
-// }
-
 void GUI::solvePuzzleByAlgo() {
+    if (solverRunning.load()) return;
+
+    solverRunning.store(true);
+
     game_solving = true;
     game_solved = false;
     timeTaken = 0;
 
-    std::thread([this]() {
+    if (solverThread && solverThread->joinable()) {
+        solverThread->join();
+    }
+
+    solverThread = std::make_unique<std::thread>([this]() {
         auto start = std::chrono::high_resolution_clock::now();
 
-        backtracking::solve(grid);
+        switch (selected_algo) {
+            case ALGO_ALL:
+                break;
+            case ALGO_BACKTRACKING:
+                backtracking::solve(grid);
+                break;
+            default:
+                break;
+        }
 
         auto end = std::chrono::high_resolution_clock::now();
         timeTaken = std::chrono::duration<double, std::milli>(end - start).count();
+
         game_solved = true;
         game_solving = false;
-    }).detach();
+        solverRunning.store(false);
+    });
 }
 
 void GUI::renderTime() {
@@ -91,7 +84,7 @@ void GUI::renderTime() {
     }
 }
 
-bool Spinner(const char* label, float radius, int thickness, const ImU32& color) {
+bool GUI::Spinner(const char* label, float radius, int thickness, const ImU32& color) {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if (window->SkipItems) return false;
 
@@ -129,7 +122,7 @@ bool Spinner(const char* label, float radius, int thickness, const ImU32& color)
 void GUI::renderUI() {
     ImVec2 center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(1400, 900));
+    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.8f , io.DisplaySize.y * 0.95f));
 
     ImGui::Begin("Sudoku-X", NULL, window_flags);
 
