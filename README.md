@@ -1,2 +1,2 @@
 # Sudoku-Solver
-![image](https://github.com/user-attachments/assets/503b0f5b-8a11-473e-a169-9005420aeb46)
+https://github.com/user-attachments/assets/283d89a3-4181-44a3-813c-fc396d1e3824
