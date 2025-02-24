@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.10)
 project(Sudoku-Solver VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native -flto")
-set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
+
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+
+# set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native -flto")
+# set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
 
 
 message(STATUS "Using C++ Compiler: ${CMAKE_CXX_COMPILER}")
@@ -34,6 +37,8 @@ add_executable(sudokuSolver
     src/generatePuzzle.cpp
     src/puzzleRender.cpp
     src/backtracking.cpp
+    src/simulatedAnnealing.cpp
+    src/genetic.cpp
 )
 
 target_link_libraries(sudokuSolver

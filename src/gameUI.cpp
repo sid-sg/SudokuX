@@ -1,8 +1,10 @@
 #include "gameUI.hpp"
 
 #include <chrono>
+#include <array>
 
 #include "generatePuzzle.hpp"
+#include "genetic.hpp"
 #include "puzzleRender.hpp"
 
 GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0) {
@@ -44,7 +46,6 @@ void GUI::solvePuzzleByAlgo() {
     if (solverRunning.load()) return;
 
     solverRunning.store(true);
-
     game_solving = true;
     game_solved = false;
     timeTaken = 0;
@@ -56,31 +57,77 @@ void GUI::solvePuzzleByAlgo() {
     solverThread = std::make_unique<std::thread>([this]() {
         auto start = std::chrono::high_resolution_clock::now();
 
-        switch (selected_algo) {
-            case ALGO_ALL:
-                break;
-            case ALGO_BACKTRACKING:
-                backtracking::solve(grid);
-                break;
-            default:
-                break;
-        }
+        if (selected_algo == ALGO_ALL) {
+            std::vector<std::pair<std::string, double>> algo_times;
+            std::vector<std::vector<int>> solved_grid;
 
-        auto end = std::chrono::high_resolution_clock::now();
-        timeTaken = std::chrono::duration<double, std::milli>(end - start).count();
+            // Backtracking
+            auto algo_start = std::chrono::high_resolution_clock::now();
+            solved_grid = grid;
+            backtracking::solve(solved_grid);
+            auto algo_end = std::chrono::high_resolution_clock::now();
+            algo_times.emplace_back("Backtracking", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
+
+            // Simulated Annealing
+            algo_start = std::chrono::high_resolution_clock::now();
+            std::vector<std::vector<int>> sa_grid = grid;
+            simulatedAnnealing::solve(sa_grid, givens);
+            algo_end = std::chrono::high_resolution_clock::now();
+            algo_times.emplace_back("Simulated Annealing", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
+
+
+            timeResults = algo_times;
+            grid = solved_grid;  
+        } else {
+            auto algo_start = std::chrono::high_resolution_clock::now();
+
+            // std::vector<std::vector<int>> temp_grid = grid;
+            switch (selected_algo) {
+                case ALGO_BACKTRACKING:
+                    backtracking::solve(grid);
+                    break;
+                case ALGO_SIMULATED_ANNEALING:
+                    simulatedAnnealing::solve(grid, givens);
+                    break;
+                default:
+                    break;
+            }
+
+            auto algo_end = std::chrono::high_resolution_clock::now();
+            timeTaken = std::chrono::duration<double, std::milli>(algo_end - algo_start).count();
+
+            // grid = temp_grid;  // Update grid with solution
+        }
 
         game_solved = true;
         game_solving = false;
         solverRunning.store(false);
+
+        // std::this_thread::sleep_for(std::chrono::milliseconds(10));
     });
 }
 
 void GUI::renderTime() {
-    if (timeTaken >= 1000) {
-        double seconds = timeTaken / 1000.0;
-        ImGui::Text("Time taken: %.2f s", seconds);
+    if (selected_algo == ALGO_ALL) {
+        ImGui::TextUnformatted("Time taken by each algorithm:");
+
+        for (const auto& result : timeResults) {
+            if (result.second >= 1000) {
+                ImGui::Text("%s: %.2f seconds", result.first.c_str(), result.second / 1000.0);
+            } else if (result.second >= 1.0) {
+                ImGui::Text("%s: %.2f milliseconds", result.first.c_str(), result.second);
+            } else {
+                ImGui::Text("%s: %.2f nanoseconds", result.first.c_str(), result.second * 1000.0);
+            }
+        }
     } else {
-        ImGui::Text("Time taken: %.4f ms", timeTaken);
+        if (timeTaken >= 1000) {
+            ImGui::Text("Time taken: %.2f seconds", timeTaken / 1000.0);
+        } else if (timeTaken >= 1.0) {
+            ImGui::Text("Time taken: %.2f milliseconds", timeTaken);
+        } else {
+            ImGui::Text("Time taken: %.3f nanoseconds", timeTaken * 1000.0);
+        }
     }
 }
 
@@ -120,14 +167,18 @@ bool GUI::Spinner(const char* label, float radius, int thickness, const ImU32& c
 }
 
 void GUI::renderUI() {
-    ImVec2 center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(io.DisplaySize.x * 0.8f , io.DisplaySize.y * 0.95f));
+    if (windowSize.x != io.DisplaySize.x * 0.8f || windowSize.y != io.DisplaySize.y * 0.95f) {
+        windowSize = ImVec2(io.DisplaySize.x * 0.8f, io.DisplaySize.y * 0.95f);
+        center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
+        
+        ImGui::SetNextWindowSize(windowSize);
+        ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+    }
 
     ImGui::Begin("Sudoku-X", NULL, window_flags);
 
     ImGui::PushFont(headingFont);
-    ImGui::Text("Sudoku-X");
+    ImGui::TextUnformatted("Sudoku-X");
     ImGui::PopFont();
 
     ImGui::Spacing();
@@ -136,40 +187,51 @@ void GUI::renderUI() {
 
     switch (gameState) {
         case GameState::DifficultySelection:
-            ImGui::Text("Select Difficulty:");
-            ImGui::RadioButton("Easy", &selected_difficulty, 0);
-            ImGui::RadioButton("Medium", &selected_difficulty, 1);
-            ImGui::RadioButton("Hard", &selected_difficulty, 2);
-            ImGui::RadioButton("Evil", &selected_difficulty, 3);
-            ImGui::RadioButton("Impossible", &selected_difficulty, 4);
+            grid.assign(SIZE, std::vector<int>(SIZE, EMPTY));
+            givens.assign(SIZE, std::vector<bool>(SIZE, true));
+
+            ImGui::TextUnformatted("Select Difficulty:");
+            static constexpr int totalDifficulty = 5;
+            static const std::array<std::string, totalDifficulty> difficultyLevels = {"Easy", "Medium", "Hard", "Evil", "Impossible"};
+
+            for (int i = 0; i < totalDifficulty; ++i) {
+                ImGui::RadioButton(difficultyLevels[i].c_str(), &selected_difficulty, i);
+            }
 
             if (ImGui::Button("Next ->")) gameState = GameState::WhoPlaysSelection;
             break;
 
         case GameState::WhoPlaysSelection:
-            ImGui::Text("Select Mode:");
+            ImGui::TextUnformatted("Select Mode:");
             ImGui::RadioButton("I'll Play", &selected_mode, 0);
             ImGui::RadioButton("Computer Solve", &selected_mode, 1);
 
             if (ImGui::Button("Next ->")) gameState = GameState::AlgoSelection;
             if (ImGui::Button("Back")) gameState = GameState::DifficultySelection;
+            ImGui::SameLine();
+
             break;
 
         case GameState::AlgoSelection:
-            ImGui::Text("Select Solving Algorithm:");
-            ImGui::RadioButton("All algos for benchmarking", &selected_algo, ALGO_ALL);
-            ImGui::RadioButton("Backtracking", &selected_algo, ALGO_BACKTRACKING);
+            ImGui::TextUnformatted("Select Solving Algorithm:");
+
+            static constexpr int totalAlgos = 3;
+            static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing"};
+            for (int i = 0; i < totalAlgos; ++i) {
+                ImGui::RadioButton(solvingAlgos[i].c_str(), &selected_algo, i);
+            }
 
             if (ImGui::Button("Next ->")) {
                 gameState = GameState::PlayingMode;
                 game_started = true;
             }
             if (ImGui::Button("Back")) gameState = GameState::WhoPlaysSelection;
+            ImGui::SameLine();
             break;
 
         case GameState::PlayingMode:
             if (selected_mode == 0) {
-                ImGui::Text("Game Started!");
+                ImGui::TextUnformatted("Game Started!");
                 if (game_started) {
                     generatePuzzle();
                     game_started = false;
@@ -185,16 +247,17 @@ void GUI::renderUI() {
 
                 if (ImGui::Button("Solve")) {
                     gameState = GameState::AlgoSolving;
-                    solvePuzzleByAlgo();  // Trigger solver
+                    solvePuzzleByAlgo();  
                 }
             }
 
             if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
+            ImGui::SameLine();
             break;
 
         case GameState::AlgoSolving:
             if (game_solving) {
-                ImGui::Text("Solving... Please wait.");
+                ImGui::TextUnformatted("Solving... Please wait.");
                 Spinner("##spinner", 20.0f, 4, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));  // White spinner
 
             } else if (game_solved) {
