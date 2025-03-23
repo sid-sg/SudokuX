@@ -124,8 +124,10 @@ void GUI::renderTime() {
                 ImGui::Text("%s: %.2f seconds", result.first.c_str(), result.second / 1000.0);
             } else if (result.second >= 1.0) {
                 ImGui::Text("%s: %.2f milliseconds", result.first.c_str(), result.second);
+            } else if (result.second >= 0.001) {
+                ImGui::Text("%s: %.2f microseconds", result.first.c_str(), result.second * 1000.0);
             } else {
-                ImGui::Text("%s: %.2f nanoseconds", result.first.c_str(), result.second * 1000.0);
+                ImGui::Text("%s: %.2f nanoseconds", result.first.c_str(), result.second * 1000000.0);
             }
         }
     } else {
@@ -133,8 +135,10 @@ void GUI::renderTime() {
             ImGui::Text("Time taken: %.2f seconds", timeTaken / 1000.0);
         } else if (timeTaken >= 1.0) {
             ImGui::Text("Time taken: %.2f milliseconds", timeTaken);
+        } else if (timeTaken >= 0.001) {
+            ImGui::Text("Time taken: %.2f microseconds", timeTaken * 1000.0);
         } else {
-            ImGui::Text("Time taken: %.3f nanoseconds", timeTaken * 1000.0);
+            ImGui::Text("Time taken: %.3f nanoseconds", timeTaken * 1000000.0);
         }
     }
 }

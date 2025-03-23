@@ -21,7 +21,7 @@ A high-performance **C++ Sudoku Solver** with an interactive **ImGui + OpenGL** 
 1️⃣ **Backtracking (DFS)**  
 2️⃣ **Simulated Annealing**
 
-Todo: Genetic Algorithm, Minmax Algorithm, Dancing Links, Parallel Backtracking, Parallel Dancing Links
+Todo:  Dancing Links, Parallel Dancing Links
 
 ---
 
