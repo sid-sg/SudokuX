@@ -3,16 +3,18 @@ project(Sudoku-Solver VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CXX_FLAGS_RELEASE "-O2")
+# set(CMAKE_CXX_FLAGS_RELEASE "-O0")
 
-# set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native -flto")
-# set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2 -march=native -flto")
+set(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld")
 
 
 message(STATUS "Using C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
+find_package(OpenMP REQUIRED) 
+
 
 add_library(imgui STATIC
     imgui/imgui.cpp
@@ -38,7 +40,7 @@ add_executable(sudokuSolver
     src/puzzleRender.cpp
     src/backtracking.cpp
     src/simulatedAnnealing.cpp
-    src/genetic.cpp
+    src/parallelBacktracking.cpp
 )
 
 target_link_libraries(sudokuSolver
@@ -46,5 +48,6 @@ target_link_libraries(sudokuSolver
     imgui
     OpenGL::OpenGL
     glfw
+    OpenMP::OpenMP_CXX  
 )
 

@@ -1,10 +1,9 @@
 #include "gameUI.hpp"
 
-#include <chrono>
 #include <array>
+#include <chrono>
 
 #include "generatePuzzle.hpp"
-#include "genetic.hpp"
 #include "puzzleRender.hpp"
 
 GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0) {
@@ -75,9 +74,15 @@ void GUI::solvePuzzleByAlgo() {
             algo_end = std::chrono::high_resolution_clock::now();
             algo_times.emplace_back("Simulated Annealing", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
 
+            // Parallel Backtracking
+            algo_start = std::chrono::high_resolution_clock::now();
+            solved_grid = grid;
+            parallelBacktracking::solve(solved_grid);
+            algo_end = std::chrono::high_resolution_clock::now();
+            algo_times.emplace_back("Parallel Backtracking", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
 
             timeResults = algo_times;
-            grid = solved_grid;  
+            grid = solved_grid;
         } else {
             auto algo_start = std::chrono::high_resolution_clock::now();
 
@@ -88,6 +93,9 @@ void GUI::solvePuzzleByAlgo() {
                     break;
                 case ALGO_SIMULATED_ANNEALING:
                     simulatedAnnealing::solve(grid, givens);
+                    break;
+                case ALGO_PARALLEL_BACKTRACKING:
+                    parallelBacktracking::solve(grid);
                     break;
                 default:
                     break;
@@ -170,7 +178,7 @@ void GUI::renderUI() {
     if (windowSize.x != io.DisplaySize.x * 0.8f || windowSize.y != io.DisplaySize.y * 0.95f) {
         windowSize = ImVec2(io.DisplaySize.x * 0.8f, io.DisplaySize.y * 0.95f);
         center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
-        
+
         ImGui::SetNextWindowSize(windowSize);
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     }
@@ -215,8 +223,8 @@ void GUI::renderUI() {
         case GameState::AlgoSelection:
             ImGui::TextUnformatted("Select Solving Algorithm:");
 
-            static constexpr int totalAlgos = 3;
-            static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing"};
+            static constexpr int totalAlgos = 4;
+            static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing", "Parallel Backtracking"};
             for (int i = 0; i < totalAlgos; ++i) {
                 ImGui::RadioButton(solvingAlgos[i].c_str(), &selected_algo, i);
             }
@@ -247,7 +255,7 @@ void GUI::renderUI() {
 
                 if (ImGui::Button("Solve")) {
                     gameState = GameState::AlgoSolving;
-                    solvePuzzleByAlgo();  
+                    solvePuzzleByAlgo();
                 }
             }
 
