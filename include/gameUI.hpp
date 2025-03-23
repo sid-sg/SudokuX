@@ -8,15 +8,15 @@
 #include "backtracking.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
-#include "parallelBacktracking.hpp"
 #include "simulatedAnnealing.hpp"
+#include "dlx.hpp"
 
 constexpr ImVec4 RGBA(int R, int G, int B, float A = 1.0f) { return ImVec4(R / 255.0f, G / 255.0f, B / 255.0f, A); }
 
 constexpr int ALGO_ALL = 0;
 constexpr int ALGO_BACKTRACKING = 1;
 constexpr int ALGO_SIMULATED_ANNEALING = 2;
-constexpr int ALGO_PARALLEL_BACKTRACKING = 4;
+constexpr int ALGO_DLX = 3;
 
 enum class GameState {
     // SizeSelection,  // main menu

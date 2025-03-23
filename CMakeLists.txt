@@ -13,7 +13,7 @@ message(STATUS "Using C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 find_package(OpenGL REQUIRED)
 find_package(glfw3 REQUIRED)
-find_package(OpenMP REQUIRED) 
+# find_package(OpenMP REQUIRED) 
 
 
 add_library(imgui STATIC
@@ -40,7 +40,7 @@ add_executable(sudokuSolver
     src/puzzleRender.cpp
     src/backtracking.cpp
     src/simulatedAnnealing.cpp
-    src/parallelBacktracking.cpp
+    src/dlx.cpp
 )
 
 target_link_libraries(sudokuSolver
@@ -48,6 +48,6 @@ target_link_libraries(sudokuSolver
     imgui
     OpenGL::OpenGL
     glfw
-    OpenMP::OpenMP_CXX  
+    # OpenMP::OpenMP_CXX  
 )
 

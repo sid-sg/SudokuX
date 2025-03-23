@@ -1,5 +1,6 @@
 #include "gameUI.hpp"
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 
@@ -13,8 +14,8 @@ GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game
     (void)this->io;
     this->io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
-    mainFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/BebasNeue-Regular.ttf", 24.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
-    headingFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/Bangers-Regular.ttf", 100.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    mainFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/BebasNeue-Regular.ttf", 40.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    headingFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/Boldonse-Regular.ttf", 100.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
 
     this->io.FontDefault = mainFont;
 
@@ -57,7 +58,7 @@ void GUI::solvePuzzleByAlgo() {
         auto start = std::chrono::high_resolution_clock::now();
 
         if (selected_algo == ALGO_ALL) {
-            std::vector<std::pair<std::string, double>> algo_times;
+            std::vector<std::pair<std::string, double>> algo_times;  // <algorithm name, time taken in milliseconds>
             std::vector<std::vector<int>> solved_grid;
 
             // Backtracking
@@ -74,12 +75,14 @@ void GUI::solvePuzzleByAlgo() {
             algo_end = std::chrono::high_resolution_clock::now();
             algo_times.emplace_back("Simulated Annealing", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
 
-            // Parallel Backtracking
+            // Dancing Links
             algo_start = std::chrono::high_resolution_clock::now();
             solved_grid = grid;
-            parallelBacktracking::solve(solved_grid);
+            DLX::solve(solved_grid);
             algo_end = std::chrono::high_resolution_clock::now();
-            algo_times.emplace_back("Parallel Backtracking", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
+            algo_times.emplace_back("Dancing Links", std::chrono::duration<double, std::milli>(algo_end - algo_start).count());
+
+            sort(algo_times.begin(), algo_times.end(), [](const auto& a, const auto& b) { return a.second < b.second; });
 
             timeResults = algo_times;
             grid = solved_grid;
@@ -94,8 +97,11 @@ void GUI::solvePuzzleByAlgo() {
                 case ALGO_SIMULATED_ANNEALING:
                     simulatedAnnealing::solve(grid, givens);
                     break;
-                case ALGO_PARALLEL_BACKTRACKING:
-                    parallelBacktracking::solve(grid);
+                case ALGO_DLX:
+                    std::cout << "DLX solving started\n";
+                    DLX::solve(grid);
+                    std::cout << "DLX solving finished\n";
+
                     break;
                 default:
                     break;
@@ -116,8 +122,13 @@ void GUI::solvePuzzleByAlgo() {
 }
 
 void GUI::renderTime() {
+    ImGui::Spacing();
+    ImGui::Spacing();
+
     if (selected_algo == ALGO_ALL) {
         ImGui::TextUnformatted("Time taken by each algorithm:");
+        ImGui::Spacing();
+        ImGui::Spacing();
 
         for (const auto& result : timeResults) {
             if (result.second >= 1000) {
@@ -178,6 +189,32 @@ bool GUI::Spinner(const char* label, float radius, int thickness, const ImU32& c
     return true;
 }
 
+template <typename F>
+void CenterComponent(F&& componentFunc) {
+    // Save the current cursor position
+    float startY = ImGui::GetCursorPosY();
+
+    // Begin invisible group to calculate width
+    ImGui::BeginGroup();
+    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.0f);
+    componentFunc();
+    ImGui::PopStyleVar();
+    ImGui::EndGroup();
+
+    // Get width of the component we just rendered invisibly
+    float componentWidth = ImGui::GetItemRectSize().x;
+
+    // Calculate centered position
+    float windowWidth = ImGui::GetWindowWidth();
+    float posX = (windowWidth - componentWidth) * 0.5f;
+
+    // Reset cursor position to before the invisible render
+    ImGui::SetCursorPos(ImVec2(posX, startY));
+
+    // Actually render the component
+    componentFunc();
+}
+
 void GUI::renderUI() {
     if (windowSize.x != io.DisplaySize.x * 0.8f || windowSize.y != io.DisplaySize.y * 0.95f) {
         windowSize = ImVec2(io.DisplaySize.x * 0.8f, io.DisplaySize.y * 0.95f);
@@ -187,11 +224,13 @@ void GUI::renderUI() {
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
     }
 
-    ImGui::Begin("Sudoku-X", NULL, window_flags);
+    ImGui::Begin("SudokuX", NULL, window_flags);
 
-    ImGui::PushFont(headingFont);
-    ImGui::TextUnformatted("Sudoku-X");
-    ImGui::PopFont();
+    CenterComponent([&]() {
+        ImGui::PushFont(headingFont);
+        ImGui::TextUnformatted("SudokuX");
+        ImGui::PopFont();
+    });
 
     ImGui::Spacing();
     ImGui::Separator();
@@ -203,6 +242,7 @@ void GUI::renderUI() {
             givens.assign(SIZE, std::vector<bool>(SIZE, true));
 
             ImGui::TextUnformatted("Select Difficulty:");
+
             static constexpr int totalDifficulty = 5;
             static const std::array<std::string, totalDifficulty> difficultyLevels = {"Easy", "Medium", "Hard", "Evil", "Impossible"};
 
@@ -228,7 +268,7 @@ void GUI::renderUI() {
             ImGui::TextUnformatted("Select Solving Algorithm:");
 
             static constexpr int totalAlgos = 4;
-            static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing", "Parallel Backtracking"};
+            static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing", "Dancing Li40s"};
             for (int i = 0; i < totalAlgos; ++i) {
                 ImGui::RadioButton(solvingAlgos[i].c_str(), &selected_algo, i);
             }
