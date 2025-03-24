@@ -6,8 +6,9 @@
 
 #include "generatePuzzle.hpp"
 #include "puzzleRender.hpp"
+#include "userGame.hpp"
 
-GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0) {
+GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game_solving(false), game_solved(false), selected_difficulty(0), selected_mode(0), selected_algo(ALGO_ALL), timeTaken(0), window_flags(0), hasPrinted(false) {
     grid = std::vector<std::vector<int>>(SIZE, std::vector<int>(SIZE, EMPTY));
     givens = std::vector<std::vector<bool>>(SIZE, std::vector<bool>(SIZE, true));
 
@@ -191,33 +192,155 @@ bool GUI::Spinner(const char* label, float radius, int thickness, const ImU32& c
 
 template <typename F>
 void CenterComponent(F&& componentFunc) {
-    // Save the current cursor position
     float startY = ImGui::GetCursorPosY();
 
-    // Begin invisible group to calculate width
     ImGui::BeginGroup();
     ImGui::PushStyleVar(ImGuiStyleVar_Alpha, 0.0f);
     componentFunc();
     ImGui::PopStyleVar();
     ImGui::EndGroup();
 
-    // Get width of the component we just rendered invisibly
     float componentWidth = ImGui::GetItemRectSize().x;
 
-    // Calculate centered position
     float windowWidth = ImGui::GetWindowWidth();
     float posX = (windowWidth - componentWidth) * 0.5f;
 
-    // Reset cursor position to before the invisible render
     ImGui::SetCursorPos(ImVec2(posX, startY));
 
-    // Actually render the component
     componentFunc();
 }
 
+void GUI::stateDifficultySelection() {
+    grid.assign(SIZE, std::vector<int>(SIZE, EMPTY));
+    givens.assign(SIZE, std::vector<bool>(SIZE, true));
+
+    ImGui::TextUnformatted("Select Difficulty:");
+
+    static constexpr int totalDifficulty = 5;
+    static const std::array<std::string, totalDifficulty> difficultyLevels = {"Easy", "Medium", "Hard", "Evil", "Impossible"};
+
+    for (int i = 0; i < totalDifficulty; ++i) {
+        ImGui::RadioButton(difficultyLevels[i].c_str(), &selected_difficulty, i);
+    }
+
+    if (ImGui::Button("Next ->")) gameState = GameState::WhoPlaysSelection;
+}
+void GUI::stateWhoPlaysSelection() {
+    ImGui::TextUnformatted("Select Mode:");
+    ImGui::RadioButton("I'll Play", &selected_mode, 0);
+    ImGui::RadioButton("Computer Solve", &selected_mode, 1);
+
+    if (ImGui::Button("Next ->")) {
+        if (selected_mode == 0) {
+            game_started = true;
+            gameState = GameState::UserPlayingMode;
+        } else {
+            gameState = GameState::AlgoSelection;
+        }
+    }
+    if (ImGui::Button("Back")) gameState = GameState::DifficultySelection;
+    ImGui::SameLine();
+}
+void GUI::stateAlgoSelection() {
+    ImGui::TextUnformatted("Select Solving Algorithm:");
+
+    static constexpr int totalAlgos = 4;
+    static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing", "Dancing Links"};
+    for (int i = 0; i < totalAlgos; ++i) {
+        ImGui::RadioButton(solvingAlgos[i].c_str(), &selected_algo, i);
+    }
+
+    if (ImGui::Button("Next ->")) {
+        gameState = GameState::PlayingMode;
+        game_started = true;
+    }
+    if (ImGui::Button("Back")) gameState = GameState::WhoPlaysSelection;
+    ImGui::SameLine();
+}
+void GUI::statePlayingMode() {
+    if (game_started) {
+        generatePuzzle();
+        game_started = false;
+    }
+
+    renderPuzzleForAlgo(grid, givens);
+
+    if (ImGui::Button("Solve")) {
+        gameState = GameState::AlgoSolving;
+        solvePuzzleByAlgo();
+    }
+
+    if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
+    ImGui::SameLine();
+}
+void GUI::stateAlgoSolving() {
+    if (game_solving) {
+        ImGui::TextUnformatted("Solving... Please wait.");
+        Spinner("##spinner", 20.0f, 4, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));  // White spinner
+
+    } else if (game_solved) {
+        renderPuzzleForAlgo(grid, givens);
+        renderTime();
+    }
+
+    if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
+}
+
+void GUI::stateUserPlayingMode() {
+    if (game_started) {
+        generatePuzzle();
+        game_started = false;
+        startTime = std::chrono::steady_clock::now();
+        timerRunning = true;
+    }
+
+    if (timerRunning) {
+        auto now = std::chrono::steady_clock::now();
+        runningTime = std::chrono::duration<double>(now - startTime).count();
+    }
+
+    int hours = static_cast<int>(runningTime) / 3600;
+    int minutes = (static_cast<int>(runningTime) % 3600) / 60;
+    int seconds = static_cast<int>(runningTime) % 60;
+
+    ImGui::Text("Time Elapsed: %02d:%02d:%02d", hours, minutes, seconds);
+
+    bool puzzleSolved = false;
+    float elapsedTime = 0.0f;
+
+    renderPuzzleForUser(grid, givens, puzzleSolved, elapsedTime);
+
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::Spacing();
+    ImGui::Spacing();
+
+    renderInputGrid(grid, givens);
+    ImGui::Spacing();
+
+    renderClearButton(grid);
+    ImGui::SameLine();
+
+    if (ImGui::Button("Restart", ImVec2(100, 50))) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (!givens[i][j]) {
+                    grid[i][j] = 0;
+                }
+            }
+        }
+        startTime = std::chrono::steady_clock::now();
+        runningTime = 0;
+    }
+    ImGui::SameLine();
+
+    if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
+
+    ImGui::Spacing();
+}
 void GUI::renderUI() {
-    if (windowSize.x != io.DisplaySize.x * 0.8f || windowSize.y != io.DisplaySize.y * 0.95f) {
-        windowSize = ImVec2(io.DisplaySize.x * 0.8f, io.DisplaySize.y * 0.95f);
+    if (windowSize.x != io.DisplaySize.x * 0.8f || windowSize.y != io.DisplaySize.y * 0.98f) {
+        windowSize = ImVec2(io.DisplaySize.x * 0.8f, io.DisplaySize.y * 0.98f);
         center = ImVec2(io.DisplaySize.x * 0.5f, io.DisplaySize.y * 0.5f);
 
         ImGui::SetNextWindowSize(windowSize);
@@ -238,88 +361,28 @@ void GUI::renderUI() {
 
     switch (gameState) {
         case GameState::DifficultySelection:
-            grid.assign(SIZE, std::vector<int>(SIZE, EMPTY));
-            givens.assign(SIZE, std::vector<bool>(SIZE, true));
-
-            ImGui::TextUnformatted("Select Difficulty:");
-
-            static constexpr int totalDifficulty = 5;
-            static const std::array<std::string, totalDifficulty> difficultyLevels = {"Easy", "Medium", "Hard", "Evil", "Impossible"};
-
-            for (int i = 0; i < totalDifficulty; ++i) {
-                ImGui::RadioButton(difficultyLevels[i].c_str(), &selected_difficulty, i);
-            }
-
-            if (ImGui::Button("Next ->")) gameState = GameState::WhoPlaysSelection;
+            stateDifficultySelection();
             break;
 
         case GameState::WhoPlaysSelection:
-            ImGui::TextUnformatted("Select Mode:");
-            ImGui::RadioButton("I'll Play", &selected_mode, 0);
-            ImGui::RadioButton("Computer Solve", &selected_mode, 1);
-
-            if (ImGui::Button("Next ->")) gameState = GameState::AlgoSelection;
-            if (ImGui::Button("Back")) gameState = GameState::DifficultySelection;
-            ImGui::SameLine();
-
+            stateWhoPlaysSelection();
             break;
 
         case GameState::AlgoSelection:
-            ImGui::TextUnformatted("Select Solving Algorithm:");
-
-            static constexpr int totalAlgos = 4;
-            static const std::array<std::string, totalAlgos> solvingAlgos = {"All algos for benchmarking", "Backtracking", "Simulated Annealing", "Dancing Li40s"};
-            for (int i = 0; i < totalAlgos; ++i) {
-                ImGui::RadioButton(solvingAlgos[i].c_str(), &selected_algo, i);
-            }
-
-            if (ImGui::Button("Next ->")) {
-                gameState = GameState::PlayingMode;
-                game_started = true;
-            }
-            if (ImGui::Button("Back")) gameState = GameState::WhoPlaysSelection;
-            ImGui::SameLine();
+            stateAlgoSelection();
             break;
 
         case GameState::PlayingMode:
-            if (selected_mode == 0) {
-                ImGui::TextUnformatted("Game Started!");
-                if (game_started) {
-                    generatePuzzle();
-                    game_started = false;
-                }
-                renderPuzzleForUser(grid, givens);
-            } else {
-                if (game_started) {
-                    generatePuzzle();
-                    game_started = false;
-                }
-
-                renderPuzzleForAlgo(grid, givens);
-
-                if (ImGui::Button("Solve")) {
-                    gameState = GameState::AlgoSolving;
-                    solvePuzzleByAlgo();
-                }
-            }
-
-            if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
-            ImGui::SameLine();
+            statePlayingMode();
             break;
 
         case GameState::AlgoSolving:
-            if (game_solving) {
-                ImGui::TextUnformatted("Solving... Please wait.");
-                Spinner("##spinner", 20.0f, 4, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));  // White spinner
-
-            } else if (game_solved) {
-                renderPuzzleForAlgo(grid, givens);
-                renderTime();
-            }
-
-            if (ImGui::Button("Return to Menu")) gameState = GameState::DifficultySelection;
+            stateAlgoSolving();
             break;
 
+        case GameState::UserPlayingMode:
+            stateUserPlayingMode();
+            break;
         default:
             gameState = GameState::DifficultySelection;
             break;

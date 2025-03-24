@@ -1,15 +1,16 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <thread>
 #include <vector>
 
 #include "backtracking.hpp"
+#include "dlx.hpp"
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "simulatedAnnealing.hpp"
-#include "dlx.hpp"
 
 constexpr ImVec4 RGBA(int R, int G, int B, float A = 1.0f) { return ImVec4(R / 255.0f, G / 255.0f, B / 255.0f, A); }
 
@@ -25,14 +26,9 @@ enum class GameState {
     AlgoSelection,
     PlayingMode,
     AlgoSolving,
-    AllAlgoMode
+    AllAlgoMode,
+    UserPlayingMode
 };
-
-// enum class SolvingAlgo{
-//     Backtracking,
-//     BFS,
-//     DFS
-// }
 
 class GUI {
    private:
@@ -58,21 +54,42 @@ class GUI {
     int selected_difficulty;
     int selected_algo;
 
+    std::chrono::steady_clock::time_point startTime;
+    double runningTime = 0;
+    bool timerRunning = false;
+
     std::unique_ptr<std::thread> solverThread;
     std::atomic<bool> solverRunning;
+
+    bool hasPrinted;  // for debbuging
 
    public:
     GUI();
 
     ~GUI();
 
-    bool Spinner(const char* label, float radius, int thickness, const ImU32& color);
+    // UI functions
 
+    bool Spinner(const char* label, float radius, int thickness, const ImU32& color);
+    void renderTime();
     void renderUI();
 
-    void generatePuzzle();
+    // puzzle functions
 
+    void generatePuzzle();
     void solvePuzzleByAlgo();
 
-    void renderTime();
+    // state functions
+
+    void stateDifficultySelection();
+    void stateWhoPlaysSelection();
+    void stateAlgoSelection();
+    void statePlayingMode();
+    void stateAlgoSolving();
+    void stateUserPlayingMode();
+
+    // getters
+
+    // const std::vector<std::vector<int>>& getGrid() const { return grid; }
+    // const std::vector<std::vector<bool>>& getGivens() const { return givens; }
 };
