@@ -16,7 +16,8 @@
 #endif
 
 #ifdef __EMSCRIPTEN__
-#include "../libs/emscripten/emscripten_mainloop_stub.h"
+#include <emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -24,6 +25,12 @@
 
 static void glfw_error_callback(int error, const char* description) { fprintf(stderr, "GLFW Error %d: %s\n", error, description); }
 
+// Global variables for emscripten main loop
+GLFWwindow* g_window = nullptr;
+GUI* g_gui = nullptr;
+ImVec4 g_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+#ifndef __EMSCRIPTEN__
 void setWindowIcon(GLFWwindow* window) {
     int width, height, channels;
     unsigned char* pixels = stbi_load("/home/sid/repos/sudoku/assets/icon/image.jpg", &width, &height, &channels, 4);
@@ -39,12 +46,44 @@ void setWindowIcon(GLFWwindow* window) {
         printf("Failed to load icon: %s\n", stbi_failure_reason());
     }
 }
+#endif
+
+// Main loop function for emscripten
+#ifdef __EMSCRIPTEN__
+void main_loop_iteration() {
+    if (!g_window || !g_gui)
+        return;
+
+    glfwPollEvents();
+    if (glfwGetWindowAttrib(g_window, GLFW_ICONIFIED) != 0) {
+        return;
+    }
+
+    // Start the Dear ImGui frame
+    ImGui_ImplOpenGL3_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    g_gui->renderUI();
+
+    // Rendering
+    ImGui::Render();
+    int display_w, display_h;
+    glfwGetFramebufferSize(g_window, &display_w, &display_h);
+    glViewport(0, 0, display_w, display_h);
+    glClearColor(g_clear_color.x * g_clear_color.w, g_clear_color.y * g_clear_color.w, g_clear_color.z * g_clear_color.w, g_clear_color.w);
+    glClear(GL_COLOR_BUFFER_BIT);
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+    glfwSwapBuffers(g_window);
+}
+#endif
 
 int main(int, char**) {
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit()) return 1;
 
-        // Decide GL+GLSL versions
+    // Decide GL+GLSL versions
 #if defined(IMGUI_IMPL_OPENGL_ES2)
     // GL ES 2.0 + GLSL 100 (WebGL 1.0)
     const char* glsl_version = "#version 100";
@@ -74,45 +113,54 @@ int main(int, char**) {
 #endif
 
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "SudokuX", nullptr, nullptr);
-    if (window == nullptr) return 1;
-    glfwMakeContextCurrent(window);
+    g_window = glfwCreateWindow(1280, 720, "SudokuX", nullptr, nullptr);
+    if (g_window == nullptr) return 1;
+    glfwMakeContextCurrent(g_window);
     glfwSwapInterval(1);  // Enable vsync
 
-    setWindowIcon(window);
+    #ifndef __EMSCRIPTEN__
+    setWindowIcon(g_window);
+    #endif
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    
+    // Disable loading imgui.ini in WebAssembly builds
+    #ifdef __EMSCRIPTEN__
+    io.IniFilename = nullptr;
+    
+    // For WebAssembly, we need to make sure we don't try to load fonts from the filesystem
+    // Setup font manually with the default font
+    io.Fonts->AddFontDefault();
+    #endif
 
-    GUI gui;
+    g_gui = new GUI();
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-#ifdef __EMSCRIPTEN__
-    ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
-#endif
+    ImGui_ImplGlfw_InitForOpenGL(g_window, true);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     // Our state
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    g_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
 #ifdef __EMSCRIPTEN__
-    // For an Emscripten build we are disabling file-system access, so let's not attempt to do a fopen() of the imgui.ini file.
-    // You may manually call LoadIniSettingsFromMemory() to load settings from your own storage.
-    io.IniFilename = nullptr;
-    EMSCRIPTEN_MAINLOOP_BEGIN
+    // Set the main loop for Emscripten
+    emscripten_set_main_loop(main_loop_iteration, 0, true);
 #else
-    while (!glfwWindowShouldClose(window))
-#endif
+    while (!glfwWindowShouldClose(g_window))
     {
         glfwPollEvents();
-        if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0) {
-            ImGui_ImplGlfw_Sleep(10);
+        if (glfwGetWindowAttrib(g_window, GLFW_ICONIFIED) != 0) {
+            // Sleep to avoid high CPU usage when minimized
+            // Note: ImGui_ImplGlfw_Sleep isn't a standard ImGui function, you might need to implement it
+            // or replace with a platform-specific sleep function
+            glfwWaitEvents();
             continue;
         }
 
@@ -121,21 +169,19 @@ int main(int, char**) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        gui.renderUI();
+        g_gui->renderUI();
 
         // Rendering
         ImGui::Render();
         int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwGetFramebufferSize(g_window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClearColor(g_clear_color.x * g_clear_color.w, g_clear_color.y * g_clear_color.w, g_clear_color.z * g_clear_color.w, g_clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(g_window);
     }
-#ifdef __EMSCRIPTEN__
-    EMSCRIPTEN_MAINLOOP_END;
 #endif
 
     // Cleanup
@@ -143,7 +189,8 @@ int main(int, char**) {
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
 
-    glfwDestroyWindow(window);
+    delete g_gui;
+    glfwDestroyWindow(g_window);
     glfwTerminate();
 
     return 0;

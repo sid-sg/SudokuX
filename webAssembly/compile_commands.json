@@ -1,0 +1,77 @@
+[
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/imgui.cpp.o -c /home/sid/repos/sudoku/imgui/imgui.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/imgui.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/imgui_demo.cpp.o -c /home/sid/repos/sudoku/imgui/imgui_demo.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/imgui_demo.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/imgui_draw.cpp.o -c /home/sid/repos/sudoku/imgui/imgui_draw.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/imgui_draw.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/imgui_tables.cpp.o -c /home/sid/repos/sudoku/imgui/imgui_tables.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/imgui_tables.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/imgui_widgets.cpp.o -c /home/sid/repos/sudoku/imgui/imgui_widgets.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/imgui_widgets.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/backends/imgui_impl_glfw.cpp.o -c /home/sid/repos/sudoku/imgui/backends/imgui_impl_glfw.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/backends/imgui_impl_glfw.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/imgui.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/imgui.dir/imgui/backends/imgui_impl_opengl3.cpp.o -c /home/sid/repos/sudoku/imgui/backends/imgui_impl_opengl3.cpp",
+  "file": "/home/sid/repos/sudoku/imgui/backends/imgui_impl_opengl3.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/main.cpp.o -c /home/sid/repos/sudoku/src/main.cpp",
+  "file": "/home/sid/repos/sudoku/src/main.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/gameUI.cpp.o -c /home/sid/repos/sudoku/src/gameUI.cpp",
+  "file": "/home/sid/repos/sudoku/src/gameUI.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/generatePuzzle.cpp.o -c /home/sid/repos/sudoku/src/generatePuzzle.cpp",
+  "file": "/home/sid/repos/sudoku/src/generatePuzzle.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/puzzleRender.cpp.o -c /home/sid/repos/sudoku/src/puzzleRender.cpp",
+  "file": "/home/sid/repos/sudoku/src/puzzleRender.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/userGame.cpp.o -c /home/sid/repos/sudoku/src/userGame.cpp",
+  "file": "/home/sid/repos/sudoku/src/userGame.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/backtracking.cpp.o -c /home/sid/repos/sudoku/src/backtracking.cpp",
+  "file": "/home/sid/repos/sudoku/src/backtracking.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/simulatedAnnealing.cpp.o -c /home/sid/repos/sudoku/src/simulatedAnnealing.cpp",
+  "file": "/home/sid/repos/sudoku/src/simulatedAnnealing.cpp"
+},
+{
+  "directory": "/home/sid/repos/sudoku/webAssembly",
+  "command": "/home/sid/repos/emsdk/upstream/emscripten/em++  @CMakeFiles/sudokuSolver.dir/includes_CXX.rsp  -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file /home/sid/repos/sudoku/webAssembly/shell.html -g -o CMakeFiles/sudokuSolver.dir/src/dlx.cpp.o -c /home/sid/repos/sudoku/src/dlx.cpp",
+  "file": "/home/sid/repos/sudoku/src/dlx.cpp"
+}
+]
