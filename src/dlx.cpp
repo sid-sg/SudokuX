@@ -23,19 +23,16 @@ struct Node {
 
 int SIZE_SQUARED = SIZE * SIZE;
 int SIZE_SQRT = sqrt((double)SIZE);
-int ROW_NB = SIZE * SIZE * SIZE;
-int COL_NB = 4 * SIZE * SIZE;
+int totalRows = SIZE * SIZE * SIZE;
+int totalCols = 4 * SIZE * SIZE;
 
 struct Node Head;
 struct Node* HeadNode = &Head;
 struct Node* solution[MAX_K];
 struct Node* orig_values[MAX_K];
-std::vector<std::vector<bool>> matrix(ROW_NB, std::vector<bool>(COL_NB,  0));
+std::vector<std::vector<bool>> matrix(totalRows, std::vector<bool>(totalCols,  0));
 bool isSolved = false;
 
-//===============================================================================================================//
-//----------------------------------------------- Print Functions -----------------------------------------------//
-//===============================================================================================================//
 
 void MapSolutionToGrid(std::vector<std::vector<int>>& grid) {
     for (int i = 0; solution[i] != NULL; i++) {
@@ -46,9 +43,6 @@ void MapSolutionToGrid(std::vector<std::vector<int>>& grid) {
     }
 }
 
-//===============================================================================================================//
-//---------------------------------------------DLX Functions-----------------------------------------------------//
-//===============================================================================================================//
 
 void coverColumn(Node* col) {
     col->left->right = col->right;
@@ -107,15 +101,12 @@ void search(int k, std::vector<std::vector<int>>& originalGrid) {
     uncoverColumn(Col);
 }
 
-//===============================================================================================================//
-//----------------------Functions to turn a Sudoku grid into an Exact Cover problem -----------------------------//
-//===============================================================================================================//
 
 //--------------------------BUILD THE INITIAL MATRIX CONTAINING ALL POSSIBILITIES--------------------------------//
 void BuildSparseMatrix(std::vector<std::vector<bool>>& matrix) {
     // Constraint 1: There can only be one value in any given cell
     int j = 0, counter = 0;
-    for (int i = 0; i < ROW_NB; i++) {  // iterate over all rows
+    for (int i = 0; i < totalRows; i++) {  // iterate over all rows
         matrix[i][j] = 1;
         counter++;
         if (counter >= SIZE) {
@@ -139,7 +130,7 @@ void BuildSparseMatrix(std::vector<std::vector<bool>>& matrix) {
 
     // Constraint 3: There can only be one instance of a number in any given column
     j = 2 * SIZE_SQUARED;
-    for (int i = 0; i < ROW_NB; i++) {
+    for (int i = 0; i < totalRows; i++) {
         matrix[i][j] = 1;
         j++;
         if (j >= 3 * SIZE_SQUARED) j = 2 * SIZE_SQUARED;
@@ -147,7 +138,7 @@ void BuildSparseMatrix(std::vector<std::vector<bool>>& matrix) {
 
     // Constraint 4: There can only be one instance of a number in any given region
     x = 0;
-    for (j = 3 * SIZE_SQUARED; j < COL_NB; j++) {
+    for (j = 3 * SIZE_SQUARED; j < totalCols; j++) {
         for (int l = 0; l < SIZE_SQRT; l++) {
             for (int k = 0; k < SIZE_SQRT; k++) matrix[x + l * SIZE + k * SIZE_SQUARED][j] = 1;
         }
@@ -175,7 +166,7 @@ void BuildDLL(std::vector<std::vector<bool>>& matrix) {
     Node* temp = header;
 
     // Create all Column Nodes
-    for (int i = 0; i < COL_NB; i++) {
+    for (int i = 0; i < totalCols; i++) {
         Node* newNode = new Node;
         newNode->size = 0;
         newNode->up = newNode;
@@ -189,7 +180,7 @@ void BuildDLL(std::vector<std::vector<bool>>& matrix) {
 
     int ID[3] = {0, 1, 1};
     // Add a Node for each 1 present in the sparse matrix and update Column Nodes accordingly
-    for (int i = 0; i < ROW_NB; i++) {
+    for (int i = 0; i < totalRows; i++) {
         Node* top = header->right;
         Node* prev = NULL;
 
@@ -204,7 +195,7 @@ void BuildDLL(std::vector<std::vector<bool>>& matrix) {
             ID[0]++;
         }
 
-        for (int j = 0; j < COL_NB; j++, top = top->right) {
+        for (int j = 0; j < totalCols; j++, top = top->right) {
             if (matrix[i][j]) {
                 Node* newNode = new Node;
                 newNode->rowID[0] = ID[0];
