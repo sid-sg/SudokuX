@@ -16,6 +16,9 @@ if(EMSCRIPTEN)
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/webAssembly")
     set(CMAKE_EXECUTABLE_SUFFIX ".html")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -sASSERTIONS -sERROR_ON_UNDEFINED_SYMBOLS=0 -s USE_GLFW=3 -s USE_WEBGL2=1 -s FULL_ES3=1 -s WASM=1 -s USE_PTHREADS=1 -pthread -s PTHREAD_POOL_SIZE=4 -s --shell-file ${CMAKE_SOURCE_DIR}/webAssembly/shell.html")
+    
+    # Preload font folder
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file ${CMAKE_SOURCE_DIR}/assets/font@assets/font")
 endif()
 
 message(STATUS "Using C++ Compiler: ${CMAKE_CXX_COMPILER}")

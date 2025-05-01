@@ -15,16 +15,9 @@ GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game
     (void)this->io;
     this->io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
-    // mainFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/BebasNeue-Regular.ttf", 40.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
-    // headingFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/Boldonse-Regular.ttf", 100.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
-
 #ifdef __EMSCRIPTEN__
-    // In WebAssembly, use the default font or load using the proper path in the virtual filesystem
-    mainFont = this->io.Fonts->AddFontDefault();
-    headingFont = this->io.Fonts->AddFontDefault();
-// If you've preloaded the assets folder, you can try with the proper path:
-// mainFont = this->io.Fonts->AddFontFromFileTTF("assets/font/BebasNeue-Regular.ttf", 40.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
-// headingFont = this->io.Fonts->AddFontFromFileTTF("assets/font/Boldonse-Regular.ttf", 100.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    mainFont = this->io.Fonts->AddFontFromFileTTF("assets/font/BebasNeue-Regular.ttf", 30.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    headingFont = this->io.Fonts->AddFontFromFileTTF("assets/font/Boldonse-Regular.ttf", 80.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
 #else
     // Native builds use the relative path
     mainFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/BebasNeue-Regular.ttf", 40.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
