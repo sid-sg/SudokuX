@@ -20,8 +20,10 @@
 #include <emscripten/html5.h>
 #endif
 
+#ifndef __EMSCRIPTEN__
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#endif
 
 static void glfw_error_callback(int error, const char* description) { fprintf(stderr, "GLFW Error %d: %s\n", error, description); }
 
@@ -33,7 +35,7 @@ ImVec4 g_clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 #ifndef __EMSCRIPTEN__
 void setWindowIcon(GLFWwindow* window) {
     int width, height, channels;
-    unsigned char* pixels = stbi_load("/home/sid/repos/sudoku/assets/icon/image.jpg", &width, &height, &channels, 4);
+    unsigned char* pixels = stbi_load("../assets/icon/image.jpg", &width, &height, &channels, 4);
     if (pixels) {
         GLFWimage icon;
         icon.width = width;

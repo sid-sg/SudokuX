@@ -82,6 +82,13 @@
           if (text) console.error('[post-exception status] ' + text);
         };
       };
+      
+      var canvas = document.getElementById("canvas");
+      document.body.addEventListener("wheel", function(e) {
+      if (document.activeElement === canvas) {
+        e.preventDefault();
+      }
+  }, { passive: false });
     </script>
     {{{ SCRIPT }}}
   </body>

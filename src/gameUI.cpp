@@ -16,8 +16,8 @@ GUI::GUI() : io(ImGui::GetIO()), solverRunning(false), game_started(false), game
     this->io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
 #ifdef __EMSCRIPTEN__
-    mainFont = this->io.Fonts->AddFontFromFileTTF("assets/font/BebasNeue-Regular.ttf", 30.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
-    headingFont = this->io.Fonts->AddFontFromFileTTF("assets/font/Boldonse-Regular.ttf", 80.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    mainFont = this->io.Fonts->AddFontFromFileTTF("assets/font/BebasNeue-Regular.ttf", 25.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
+    headingFont = this->io.Fonts->AddFontFromFileTTF("assets/font/Boldonse-Regular.ttf", 75.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
 #else
     // Native builds use the relative path
     mainFont = this->io.Fonts->AddFontFromFileTTF("../assets/font/BebasNeue-Regular.ttf", 40.0f, nullptr, io.Fonts->GetGlyphRangesDefault());
